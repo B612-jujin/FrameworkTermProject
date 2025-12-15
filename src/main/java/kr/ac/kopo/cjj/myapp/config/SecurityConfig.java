@@ -1,20 +1,15 @@
 package kr.ac.kopo.cjj.myapp.config;
 
-import kr.ac.kopo.cjj.myapp.custom.CustomUserDetails;
+import kr.ac.kopo.cjj.myapp.service.UserAccountService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.util.matcher.AntPathRequestMatcher;  // ← 추가
+import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.web.util.matcher.RequestMatcher;
-
-import java.util.List;
+import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 public class SecurityConfig {
@@ -25,42 +20,52 @@ public class SecurityConfig {
     }
 
     @Bean
-    public InMemoryUserDetailsManager userDetailsService(PasswordEncoder encoder) {
-        // 사용자1: profilePictureUrl="/images/user1.png"
-        CustomUserDetails user = new CustomUserDetails(
-                "user1",
-                encoder.encode("pass123"),
-                List.of(new SimpleGrantedAuthority("USER")),
-                "/images/user.png"
-        );
-
-        CustomUserDetails user2 = new CustomUserDetails(
-                "user2",
-                encoder.encode("pass123"),
-                List.of(new SimpleGrantedAuthority("USER")),
-                "/images/user1.png"
-        );
-
-        // 관리자: profilePictureUrl="/images/admin.png"
-        CustomUserDetails admin = new CustomUserDetails(
-                "admin",
-                encoder.encode("admin123"),
-                List.of(new SimpleGrantedAuthority("ADMIN")),
-                "/images/admin.png"
-        );
-
-        return new InMemoryUserDetailsManager(user, admin, user2);
+    public UserDetailsService userDetailsService(UserAccountService userAccountService) {
+        return userAccountService;
     }
+
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public DaoAuthenticationProvider authenticationProvider(UserAccountService userAccountService,
+                                                            PasswordEncoder passwordEncoder) {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setUserDetailsService(userAccountService);
+        provider.setPasswordEncoder(passwordEncoder);
+        return provider;
+    }
+
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http, DaoAuthenticationProvider authenticationProvider) throws Exception {
         http
-                .csrf(csrf -> csrf.disable())  // CSRF 비활성화 시 GET/POST 모두 즉시 로그아웃
+                .csrf(csrf -> csrf
+                        .ignoringRequestMatchers("/h2-console/**")
+                        .disable())
                 .authorizeHttpRequests(auth -> auth
-                        // 로그인·정적 리소스는 모두 공개
-                        .requestMatchers("/login", "/css/**", "/js/**", "/images**").permitAll()
-                        // 채팅 페이지와 WS 핸드셰이크는 인증된 사용자만
+                        // 공개 영역
+                        .requestMatchers("/", "/home", "/login", "/register", "/css/**", "/js/**", "/images/**", "/h2-console/**").permitAll()
+                        // 관리자 전용: 생성/수정/삭제/가시성 토글
+                        .requestMatchers(
+                                HttpMethod.POST,
+                                "/portfolios/new",
+                                "/portfolios/*/edit",
+                                "/portfolios/*/delete",
+                                "/portfolios/*/toggle-visibility"
+                        ).hasRole("ADMIN")
+                        .requestMatchers(
+                                HttpMethod.GET,
+                                "/portfolios/new",
+                                "/portfolios/*/edit",
+                                "/portfolios/*/delete"
+                        ).hasRole("ADMIN")
+                        .requestMatchers("/admin/tech/**").hasRole("ADMIN")
+                        // 공개: 목록/상세
+                        .requestMatchers(HttpMethod.GET, "/portfolios").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/portfolios/**").permitAll()
+
+                        // 사용자/관리자: 피드백 작성
+                        .requestMatchers(HttpMethod.POST, "/portfolios/*/feedback").authenticated()
+                        .requestMatchers("/settings/**").authenticated()
+
                         .requestMatchers("/chat", "/ws/**").authenticated()
-                        // 그 외도 모두 인증 필요
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
@@ -69,17 +74,19 @@ public class SecurityConfig {
                         .defaultSuccessUrl("/home", true)
                         .usernameParameter("username")
                         .passwordParameter("password")
+                        .failureHandler(new LoggingAuthenticationFailureHandler())
                         .permitAll()
                 )
                 .logout(logout -> logout
-                        .logoutUrl("/logout")                  // 기본 /logout 엔드포인트 사용
-                        .logoutSuccessUrl("/login?logout")     // 로그아웃 후 리다이렉트
-                        .invalidateHttpSession(true)           // 세션 무효화
-                        .deleteCookies("JSESSIONID")           // 쿠키 삭제
-                        .permitAll()                           // 누구나 접근 허용
-                );
+                        .logoutUrl("/logout")
+                        .logoutSuccessUrl("/login?logout")
+                        .invalidateHttpSession(true)
+                        .deleteCookies("JSESSIONID")
+                        .permitAll()
+                )
+                .authenticationProvider(authenticationProvider)
+                .headers(headers -> headers.frameOptions(frame -> frame.disable()));
 
         return http.build();
     }
-
 }

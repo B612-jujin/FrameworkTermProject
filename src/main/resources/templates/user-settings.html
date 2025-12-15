@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>User Settings</title>
+  <link rel="stylesheet" th:href="@{/css/loginStyle.css}">
+  <link rel="stylesheet" th:href="@{/css/headerstyle.css}">
+  <link rel="stylesheet" th:href="@{/css/menustyle.css}">
+  <link rel="stylesheet" th:href="@{/css/AvaterStyle.css}">
+  <style>
+    .product-info-card.goal-card { box-shadow:0 6px 16px rgba(0,0,0,0.06); }
+  </style>
+</head>
+<body>
+<div th:replace="fragments/admin-sidebar :: adminSidebar"></div>
+<div th:replace="fragments/header :: commonHeader"></div>
+
+<div class="hero-form">
+  <div class="text-content-title">
+    <div class="logintitle">사용자 설정</div>
+    <div class="subtitle">프로필/비밀번호/계정 관리</div>
+  </div>
+
+  <form th:action="@{/settings/update}" method="post" enctype="multipart/form-data" class="form-contact">
+    <div class="input-field">
+      <label class="label">Username</label>
+      <input type="text" class="input" th:value="${user.username}" disabled />
+    </div>
+    <div class="input-field">
+      <label class="label" for="newPassword">새 비밀번호</label>
+      <input type="password" id="newPassword" name="newPassword" class="input" placeholder="변경하지 않으려면 비워두세요" />
+    </div>
+    <div class="input-field">
+      <label class="label" for="profilePictureUrl">프로필 이미지 URL</label>
+      <input type="url" id="profilePictureUrl" name="profilePictureUrl" class="input" th:value="${user.profilePictureUrl}" />
+    </div>
+    <div class="input-field">
+      <label class="label" for="profileFile">프로필 이미지 업로드</label>
+      <input type="file" id="profileFile" name="profileFile" class="input" accept="image/*" />
+    </div>
+    <div class="input-field">
+      <label class="label" for="description">소개</label>
+      <textarea id="description" name="description" class="input" rows="3" th:text="${user.description}"></textarea>
+    </div>
+    <div class="button-group">
+      <button type="submit" class="button2 button">저장</button>
+    </div>
+  </form>
+
+  <form th:action="@{/settings/delete}" method="post" class="form-contact">
+    <div class="input-field">
+      <label class="label">계정 삭제</label>
+      <p class="error">이 작업은 되돌릴 수 없습니다.</p>
+    </div>
+    <div class="button-group">
+      <button type="submit" class="button3 button4">계정 삭제</button>
+    </div>
+  </form>
+</div>
+</body>
+</html>

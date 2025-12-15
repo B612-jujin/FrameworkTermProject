@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="en">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="ko">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,150 +8,103 @@
   <link rel="stylesheet" th:href="@{/css/menustyle.css}">
   <link rel="stylesheet" th:href="@{/css/AvaterStyle.css}">
   <link rel="stylesheet" th:href="@{/css/loginStyle.css}">
+  <style>
+    .layout-shell { display:block; }
+    .with-admin { display:flex; }
+    .no-admin { display:block; }
+    .main-content { width:100%; margin-left:0; }
+    .main-content-inner { max-width: 1200px; margin: 0 auto; padding: 0 16px; }
+    .with-sidebar { margin-left:240px; }
+    @media (max-width: 1024px) {
+      .with-sidebar { margin-left:0 !important; }
+    }
 
-
-
-
-
+    .page-product-results { background:#f6f7fb; min-height:100vh; padding-bottom:24px; }
+    .section-product-grid { padding:16px; }
+    .card-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:14px; }
+    .product-info-card { box-shadow:0 6px 16px rgba(0,0,0,0.06); border-radius:12px; background:#fff; overflow:hidden; }
+    .noimage, .placeholder { border-top-left-radius:12px; border-top-right-radius:12px; }
+    .goal-body { padding:12px 14px 16px; display:flex; flex-direction:column; gap:8px; height:100%; }
+    .goal-actions { margin-left:auto; }
+    .filter-box { display:flex; gap:8px; align-items:flex-end; flex-wrap:wrap; }
+    .filter-actions { display:flex; gap:8px; flex-wrap:wrap; }
+    @media (max-width: 1024px) {
+      .card-grid { grid-template-columns:repeat(auto-fill,minmax(200px,1fr)); }
+      .filter-box { flex-direction:column; align-items:flex-start; }
+    }
+  </style>
 </head>
 <body>
-  <div class="header">
-      <div class="avatar-block">
-    <div class="avatar">
-      <img class="shape"
-           th:src="@{${profilePictureUrl}}"
-           alt="Profile Picture"/>
-    </div>
-    <div class="info">
-      <div class="title" th:text="${#authentication.name}">USERNAME</div>
+<div class="layout-shell" th:classappend="${#authorization.expression('hasRole(''ADMIN'')') ? ' with-admin' : ' no-admin'}">
+  <div sec:authorize="hasRole('ADMIN')" th:replace="fragments/admin-sidebar :: adminSidebar"></div>
 
-      <div class="description">오늘도</div>
-      <!-- 3글자 리미트 걸기 -->
-    </div>
+  <div class="main-content" th:classappend="${#authorization.expression('hasRole(''ADMIN'')') ? 'with-sidebar' : ''}">
+    <div class="main-content-inner">
+      <div th:replace="fragments/header :: commonHeader"></div>
 
-  </div>
-<!--네비 바-->
-    <div class="navigation-pill-list">
-      <div class="navigation-pill">
-        <a href="/" class="nav-link no-underline">
-          <div class="title2">Home</div>
-        </a>
-      </div>
-      <div class="navigation-pill2">
-        <a href="/study" class="nav-link no-underline">
-          <div class="title2">Study</div>
-        </a>
-      </div>
-      <div class="navigation-pill2">
-        <a href="/chat" class="nav-link no-underline">
-          <div class="title2">Community</div>
-        </a>
-      </div>
-      <div class="navigation-pill2">
-        <a href="https://chat.openai.com" class="nav-link no-underline" target="_blank" rel="noopener">
-          <div class="title2">AI</div>
-        </a>
-      </div>
-      <div class="navigation-pill2">
-        <a href="https://github.com/B612-jujin" class="nav-link no-underline" target="_blank" rel="noopener">
-          <div class="title2">GITHUB</div>
-        </a>
-      </div>
-    </div>
-
-
-    <div class="header-auth">
-    <!-- 로그아웃만 표시 -->
-    <div class="button">
-      <a class="button2" href="/logout">Sign Out</a>
-    </div>
-    <div class="button3">
-      <!-- 유저 프로필 정보 표시 -->
-      <div class="button4">Register</div>
-    </div>
-  </div>
-</div>
-
-<div class="page-product-results">
-    <!-- 사이드 음악 바 -->
-  <div class="filter-menu">
-    <div class="header" style="padding: 0%;">
-      <div style="font-size: 20px;">음악</div>
-    </div>
-    <div style="display: flex;">
-      <button class="button" id="fileBtn"><div class="button2">File🗂️</div></button>
-      <button class="button3" id="urlBtn"><div class="button4">URL📼</div></button>
-      </div>
-      <input id="filePicker" type="file" accept="audio/mp3" style="display:none" />
-      <input id="urlInput" type="text" placeholder="https://youtu.be/…" style="display:none; width:100%;" class="input-field" />
-      <button id="setUrlBtn" style="display:none;" class="button2">URL 설정</button>
-
-    <div id="playerContainer">
-      <audio id="player" controls style="display:none; width:100%; max-width:600px;"></audio>
-      <div id="youtubeContainer" style="display:none;"></div>
-    </div>
-
-
-
-    <div class="body">
-      <div class="text">
-            <div id="sourceInfo" style="visibility: collapse;">곡 이름</div>
-      </div>
-      <div class="text-strong">
-        <div class="text-strong2"></div>
-      </div>
-    </div>
-      <!-- 로직 분리된 JS -->
-  <script src="/js/musicSrc.js"></script>
-  </div>
-
-  <div class="section-product-grid">
-    <div class="filter-bar">
-      <div class="tag-toggle-group">
-        <div class="tag-toggle" sec:authorize="hasRole('ADMIN')"><a href="/goals/new" class="title">New Goal</a></div>
-      </div>
-    </div>
-
-    <!-- 카드 그리드 영역 -->
-    <div class="card-grid">
-      <div th:each="goal : ${goals}" class="product-info-card goal-card">
-        <!-- 이미지가 있을 때 -->
-        <!-- 1) 진짜 이미지가 있을 때만 렌더링 -->
-        <div
-                class="noimage"
-                th:if="${goal.imageUrl != null and !#strings.isEmpty(goal.imageUrl)}"
-                th:style="|background-image: url('${goal.imageUrl}');|">
-        </div>
-
-        <!-- 2) 이미지가 없거나 빈 문자열일 때만 placeholder -->
-        <div
-                class="noimage placeholder"
-                th:if="${goal.imageUrl == null or #strings.isEmpty(goal.imageUrl)}"
-                th:style="|background: ${goal.randomColor} !important;|">
-        </div>
-
-
-
-        <div class="goal-body">
-          <h3 class="goal-title" th:text="${goal.title}">목표 제목</h3>
-          <div class="goal-meta">
-            <span class="goal-date"
-                  th:text="${goal.startDate}">2025.06.27</span>
-            <span class="goal-category" th:text="${goal.category}">취미</span>
+      <div class="page-product-results">
+        <div class="section-product-grid">
+          <div class="filter-bar">
+            <form method="get" action="/home" class="filter-box">
+              <div>
+                <label for="tech" class="label" style="margin:0;">기술 필터</label>
+                <select id="tech" name="tech" class="input" multiple size="4" style="min-width:180px;">
+                  <option th:each="tech : ${techList}"
+                          th:value="${tech.name}"
+                          th:text="${tech.name}"
+                          th:selected="${selectedTech != null and selectedTech.contains(tech.name)}">Tech</option>
+                </select>
+              </div>
+              <div>
+                <label for="q" class="label" style="margin:0;">키워드</label>
+                <input type="text" id="q" name="q" th:value="${keyword}" class="input" placeholder="제목/설명/기술 검색" style="min-width:180px;" />
+              </div>
+              <div class="filter-actions">
+                <button type="submit" class="button2 button">필터 적용</button>
+                <a href="/home" class="button3 button4">필터 해제</a>
+              </div>
+            </form>
           </div>
-          <div class="progress-container">
-            <div class="progress-bar"><div class="progress-fill" th:style="|width: ${goal.progress}%;|"></div></div>
-            <span class="progress-text" th:text="${goal.progress + '%'}">75%</span>
+
+          <div class="card-grid">
+            <div th:each="portfolio : ${portfolios}" class="product-info-card goal-card" style="display:flex; flex-direction:column; text-decoration: none;">
+              <div
+                      class="noimage"
+                      th:if="${portfolio.imageUrl != null and !#strings.isEmpty(portfolio.imageUrl)}"
+                      th:style="|background-image: url('${portfolio.imageUrl}'); min-height:200px; background-size:cover; background-position:center;|">
+              </div>
+
+              <div
+                      class="noimage placeholder"
+                      th:if="${portfolio.imageUrl == null or #strings.isEmpty(portfolio.imageUrl)}"
+                      th:style="|background: ${portfolio.randomColor} !important; min-height:200px;|">
+              </div>
+
+              <div class="goal-body" style="display:flex; flex-direction:column; gap:6px;">
+                <h3 class="goal-title" th:text="${portfolio.title}">포트폴리오 제목</h3>
+                <div class="goal-meta" style="display:flex; gap:8px; flex-wrap:wrap;">
+                  <span class="goal-category" th:text="${portfolio.techStack}">사용 기술</span>
+                </div>
+                <p class="goal-description" th:text="${portfolio.description}">프로젝트 설명</p>
+                <div class="goal-links" style="display:flex; gap:8px; flex-wrap:wrap;">
+                  <a th:if="${portfolio.projectLink}" th:href="${portfolio.projectLink}" target="_blank" rel="noopener" class="title2">프로젝트 링크</a>
+                  <a th:if="${portfolio.extraUrl}" th:href="${portfolio.extraUrl}" target="_blank" rel="noopener" class="title2">기타 링크</a>
+                </div>
+                <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:auto;">
+                  <a th:href="@{/portfolios/{id}(id=${portfolio.id})}" class="button button2">상세보기</a>
+                  <div sec:authorize="hasRole('ADMIN')" class="goal-actions" style="display:flex; gap:8px;">
+                    <a th:href="@{/portfolios/{id}/edit(id=${portfolio.id})}" class="button button2 edit">Edit</a>
+                    <a th:href="@{/portfolios/{id}/delete(id=${portfolio.id})}" class="button3 button4 delete">Delete</a>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-          <div sec:authorize="hasRole('ADMIN')" class="goal-actions">
-            <a th:href="@{/goals/{id}/edit(id=${goal.id})}" class="button button2 edit">Edit</a>
-            <a th:href="@{/goals/{id}/delete(id=${goal.id})}" class="button3 button4 delete">Delete</a>
-          </div>
+
         </div>
       </div>
     </div>
   </div>
 </div>
-
 </body>
 </html>

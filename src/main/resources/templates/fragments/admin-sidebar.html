@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="ko">
+<body>
+<div th:fragment="adminSidebar">
+  <aside class="admin-sidebar" sec:authorize="hasRole('ADMIN')" style="background:#0f172a; color:#e2e8f0; padding:20px; min-height:100vh; width:240px; position:fixed; left:0; top:0;">
+    <div style="margin-bottom:16px;">
+      <div style="font-size:18px; font-weight:700;">Admin</div>
+    </div>
+    <nav class="admin-nav" style="display:flex; flex-direction:column; gap:10px;">
+      <a href="/home" style="color:#e2e8f0; text-decoration:none; padding:10px 12px; border-radius:8px; background:#1e293b;">홈</a>
+      <a href="/portfolios/new" style="color:#e2e8f0; text-decoration:none; padding:10px 12px; border-radius:8px; background:#1e293b;">포트폴리오 생성</a>
+      <a href="/admin/tech" style="color:#e2e8f0; text-decoration:none; padding:10px 12px; border-radius:8px; background:#1e293b;">기술 스택 관리</a>
+      <a href="/admin/themes" style="color:#e2e8f0; text-decoration:none; padding:10px 12px; border-radius:8px; background:#1e293b;">피드백 테마 관리</a>
+      <a href="/settings" style="color:#e2e8f0; text-decoration:none; padding:10px 12px; border-radius:8px; background:#1e293b;">사용자 설정</a>
+      <a href="/logout" style="color:#e2e8f0; text-decoration:none; padding:10px 12px; border-radius:8px; background:#1e293b;">로그아웃</a>
+    </nav>
+  </aside>
+</div>
+</body>
+</html>

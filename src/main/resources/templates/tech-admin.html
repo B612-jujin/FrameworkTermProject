@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>기술 스택 관리</title>
+  <link rel="stylesheet" th:href="@{/css/loginStyle.css}">
+  <link rel="stylesheet" th:href="@{/css/headerstyle.css}">
+  <link rel="stylesheet" th:href="@{/css/menustyle.css}">
+  <link rel="stylesheet" th:href="@{/css/AvaterStyle.css}">
+</head>
+<body>
+<div th:replace="fragments/admin-sidebar :: adminSidebar"></div>
+
+<div class="admin-content hero-form" style="margin-left:240px;">
+    <div th:replace="fragments/header :: commonHeader"></div>
+    <div class="text-content-title">
+      <div class="logintitle">기술 스택 관리</div>
+      <div class="subtitle">추가/수정/삭제</div>
+    </div>
+
+    <form th:action="@{/admin/tech/add}" method="post" class="form-contact" style="margin-bottom: 16px;">
+      <div class="input-field">
+        <label class="label" for="name">기술 이름</label>
+        <input type="text" id="name" name="name" class="input" required />
+      </div>
+      <div class="button-group">
+        <button type="submit" class="button2 button">추가</button>
+      </div>
+    </form>
+
+    <div th:each="tech : ${techList}" class="product-info-card goal-card" style="padding: 12px; margin-bottom: 12px;">
+      <div class="goal-body">
+        <div class="goal-title" th:text="${tech.name}">Tech</div>
+        <form th:action="@{/admin/tech/{id}/edit(id=${tech.id})}" method="post" style="display:flex; gap:8px; align-items:center;">
+          <input type="text" name="name" th:value="${tech.name}" class="input" style="flex:1;" />
+          <button type="submit" class="button2 button">수정</button>
+        </form>
+        <form th:action="@{/admin/tech/{id}/delete(id=${tech.id})}" method="post" style="margin-top:8px;">
+          <button type="submit" class="button3 button4">삭제</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

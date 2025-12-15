@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title th:text="${portfolio.title}">Portfolio Detail</title>
+  <link rel="stylesheet" th:href="@{/css/headerstyle.css}">
+  <link rel="stylesheet" th:href="@{/css/menustyle.css}">
+  <link rel="stylesheet" th:href="@{/css/AvaterStyle.css}">
+  <link rel="stylesheet" th:href="@{/css/loginStyle.css}">
+  <style>
+    .product-info-card.goal-card { box-shadow:0 6px 16px rgba(0,0,0,0.06); background:#fff; }
+    .main-content { margin-left:0; }
+    .with-sidebar { margin-left:240px; }
+    @media (max-width: 1024px) {
+      .with-sidebar { margin-left:0 !important; }
+      .admin-sidebar { position:static; width:100%; min-height:auto; }
+      .section-product-grid { grid-template-columns:1fr; }
+    }
+  </style>
+</head>
+<body>
+<div th:replace="fragments/header :: commonHeader"></div>
+
+<div th:if="${#authorization.expression('hasRole(''ADMIN'')')}"
+     th:replace="fragments/admin-sidebar :: adminSidebar"></div>
+
+<div class="section-product-grid main-content"
+     th:classappend="${#authorization.expression('hasRole(''ADMIN'')') ? ' with-sidebar' : ''}"
+     style="padding: 24px; display:grid; grid-template-columns: 2fr 1fr; gap:16px; align-items:start;">
+  <div class="product-info-card goal-card">
+    <div
+            class="noimage"
+            th:if="${portfolio.imageUrl != null and !#strings.isEmpty(portfolio.imageUrl)}"
+            th:style="|background-image: url('${portfolio.imageUrl}'); height:300px; background-size:cover; background-position:center;|">
+    </div>
+    <div
+            class="noimage placeholder"
+            th:if="${portfolio.imageUrl == null or #strings.isEmpty(portfolio.imageUrl)}"
+            th:style="|background: ${portfolio.randomColor} !important; height:300px;|">
+    </div>
+    <div class="goal-body">
+      <h2 class="goal-title" th:text="${portfolio.title}">포트폴리오 제목</h2>
+      <div class="goal-meta">
+        <span class="goal-category" th:text="${portfolio.techStack}">사용 기술</span>
+        <span th:if="${portfolio.visible}" style="color: green;">공개</span>
+        <span th:if="${!portfolio.visible}" style="color: red;">비공개</span>
+      </div>
+      <p class="goal-description" th:text="${portfolio.description}">설명</p>
+      <div class="goal-links">
+        <a th:if="${portfolio.projectLink}" th:href="${portfolio.projectLink}" target="_blank" rel="noopener" class="title2">프로젝트 링크</a>
+        <a th:if="${portfolio.extraUrl}" th:href="${portfolio.extraUrl}" target="_blank" rel="noopener" class="title2">기타 링크</a>
+      </div>
+      <div class="goal-meta" th:if="${portfolio.techStack}" style="display:flex; gap:6px; flex-wrap:wrap;">
+        <strong>사용 기술:</strong>
+        <span th:each="tech : ${#strings.listSplit(portfolio.techStack, ', ')}"
+              class="goal-category"
+              th:text="${tech}">기술</span>
+      </div>
+
+      <div sec:authorize="hasRole('ADMIN')" class="goal-actions">
+        <form th:action="@{/portfolios/{id}/toggle-visibility(id=${portfolio.id})}" method="post" style="display:inline;">
+          <button type="submit" class="button2 button" th:text="${portfolio.visible} ? '비공개로 전환' : '공개로 전환'">Toggle</button>
+        </form>
+        <a th:href="@{/portfolios/{id}/edit(id=${portfolio.id})}" class="button button2 edit">Edit</a>
+        <a th:href="@{/portfolios/{id}/delete(id=${portfolio.id})}" class="button3 button4 delete">Delete</a>
+      </div>
+    </div>
+  </div>
+
+  <div style="position:relative; display:flex; flex-direction:column; gap:12px;">
+    <div>
+      <h3>피드백</h3>
+      <div th:if="${#lists.isEmpty(feedbackList)}">등록된 피드백이 없습니다.</div>
+      <div th:each="fb : ${feedbackList}" class="product-info-card goal-card" style="padding: 12px; margin-bottom: 12px;">
+        <div class="goal-meta" style="display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <strong th:text="${fb.authorName}">작성자</strong>
+            <span th:if="${fb.category}" class="goal-category" th:text="${fb.category}">테마</span>
+          </div>
+          <span th:text="${fb.relativeTime}">n시간 전</span>
+        </div>
+        <div class="goal-meta" th:if="${fb.rating != null}">
+          <span th:each="star : ${#numbers.sequence(1,5)}"
+                th:text="${star <= fb.rating ? '★' : '☆'}"></span>
+        </div>
+        <div th:text="${fb.content}">내용</div>
+      </div>
+    </div>
+
+    <div sec:authorize="isAuthenticated()" class="product-info-card goal-card" style="padding: 12px; position:sticky; bottom:0;">
+      <form th:action="@{/portfolios/{id}/feedback(id=${portfolio.id})}" method="post">
+        <div class="input-field">
+          <label class="label" for="category">테마</label>
+          <input type="text" id="category" name="category" class="input" placeholder="피드백, 부족한 점 등" />
+        </div>
+        <div class="input-field">
+          <label class="label" for="content">프로젝트 평가 / 설명</label>
+          <textarea id="content" name="content" class="input" rows="3" required></textarea>
+        </div>
+        <div class="input-field">
+          <label class="label" for="rating">별점 (1~5)</label>
+          <input type="number" id="rating" name="rating" class="input" min="1" max="5" />
+        </div>
+        <div class="button-group" style="justify-content:flex-end;">
+          <button type="submit" class="button2 button">등록</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+</body>
+</html>

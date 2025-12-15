@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="ko">
+<head>
+    <meta charset="UTF-8">
+</head>
+<body>
+<div th:fragment="commonHeader">
+    <div class="header">
+        <div class="avatar-block">
+            <div class="avatar">
+                <img class="shape"
+                     th:if="${profilePictureUrl != null and !#strings.isEmpty(profilePictureUrl)}"
+                     th:src="@{${profilePictureUrl}}"
+                     alt="Profile Picture"/>
+                <div class="shape" th:if="${profilePictureUrl == null or #strings.isEmpty(profilePictureUrl)}"
+                     style="background: linear-gradient(135deg,#5b6bff,#8ac6ff); width:100%; height:100%; border-radius:50%;"></div>
+            </div>
+            <div class="info">
+                <div class="title" th:text="${#authentication?.name}">USERNAME</div>
+                <div class="description">오늘의 나</div>
+            </div>
+        </div>
+
+        <div class="navigation-pill-list">
+            <div class="navigation-pill">
+                <a href="/home" class="nav-link no-underline">
+                    <div class="title2">Home</div>
+                </a>
+            </div>
+            <div class="navigation-pill2">
+                <a href="/study" class="nav-link no-underline">
+                    <div class="title2">Study</div>
+                </a>
+            </div>
+            <div class="navigation-pill2">
+                <a href="/chat" class="nav-link no-underline">
+                    <div class="title2">Community</div>
+                </a>
+            </div>
+            <div class="navigation-pill2" sec:authorize="hasRole('ADMIN')">
+                <a href="/admin/tech" class="nav-link no-underline">
+                    <div class="title2">Tech 관리</div>
+                </a>
+            </div>
+            <div class="navigation-pill2" sec:authorize="hasRole('ADMIN')">
+                <a href="/admin/themes" class="nav-link no-underline">
+                    <div class="title2">테마 관리</div>
+                </a>
+            </div>
+            <div class="navigation-pill2">
+                <a href="https://github.com/B612-jujin" class="nav-link no-underline" target="_blank" rel="noopener">
+                    <div class="title2">GITHUB</div>
+                </a>
+            </div>
+        </div>
+
+        <div class="header-auth">
+            <div class="button" sec:authorize="isAuthenticated()">
+                <a class="button2" href="/logout">Sign Out</a>
+            </div>
+            <div class="button3" sec:authorize="isAuthenticated()">
+                <a class="button4" href="/settings">Settings</a>
+            </div>
+            <div class="button3" sec:authorize="!isAuthenticated()">
+                <a class="button4" href="/register">Register</a>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

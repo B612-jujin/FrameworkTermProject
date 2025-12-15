@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security" lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title th:text="${portfolio.id} != null ? 'Edit Portfolio' : 'New Portfolio'">Portfolio Form</title>
+  <link rel="stylesheet" th:href="@{/css/headerstyle.css}" />
+  <link rel="stylesheet" th:href="@{/css/menustyle.css}" />
+  <link rel="stylesheet" th:href="@{/css/AvaterStyle.css}" />
+  <link rel="stylesheet" th:href="@{/css/loginStyle.css}" />
+  <style>
+    .product-info-card.goal-card { box-shadow:0 6px 16px rgba(0,0,0,0.06); }
+  </style>
+</head>
+<body>
+<div th:replace="fragments/admin-sidebar :: adminSidebar"></div>
+<div th:replace="fragments/header :: commonHeader"></div>
+
+<div class="hero-form">
+  <div class="section-product-grid">
+    <div class="text-content-title">
+      <div th:text="${portfolio.id} != null ? 'Edit Portfolio' : 'New Portfolio'" class="logintitle">Create Portfolio</div>
+    </div>
+    <div>
+      <div class="input-field">
+        <form class="form-contact" th:object="${portfolio}"
+              th:action="${portfolio.id} != null ? @{/portfolios/{id}/edit(id=${portfolio.id})} : @{/portfolios/new}"
+              method="post" enctype="multipart/form-data">
+
+          <div class="input-field">
+            <label for="title" class="label">프로젝트 제목</label>
+            <input type="text" id="title" class="input" th:field="*{title}" required />
+          </div>
+
+          <div class="input-field">
+            <label for="techStack" class="label">사용 기술</label>
+            <select id="techStack" class="input" name="techSelections" multiple size="4">
+              <option th:each="tech : ${techList}"
+                      th:value="${tech.name}"
+                      th:text="${tech.name}"
+                      th:selected="${portfolio.techStack != null and #lists.contains(#strings.listSplit(portfolio.techStack, ', '), tech.name)}">
+              </option>
+            </select>
+            <small>목록에 없다면 관리자 페이지에서 추가하세요. (여러 개 선택 가능)</small>
+          </div>
+
+          <div class="input-field">
+            <label for="description" class="label">설명</label>
+            <textarea id="description" class="input" th:field="*{description}" rows="4" placeholder="프로젝트 설명을 입력하세요"></textarea>
+          </div>
+
+          <div class="input-field">
+            <label class="label" for="projectLink">프로젝트 링크</label>
+            <input type="url" id="projectLink" th:field="*{projectLink}" placeholder="https://github.com/..." />
+          </div>
+
+          <div class="input-field">
+            <label class="label" for="extraUrl">기타 URL</label>
+            <input type="url" id="extraUrl" th:field="*{extraUrl}" placeholder="https://..." />
+          </div>
+
+          <div class="input-field">
+            <label class="label" for="imageUrl">대표 이미지 URL</label>
+            <input type="url" id="imageUrl" th:field="*{imageUrl}" placeholder="https://example.com/image.png" />
+          </div>
+
+          <div class="input-field">
+            <label class="label" for="imageFile">대표 이미지 업로드</label>
+            <input type="file" id="imageFile" name="imageFile" accept="image/*" />
+          </div>
+
+          <div class="input-field" sec:authorize="hasRole('ADMIN')">
+            <label class="label" for="visible">피드/목록에 노출</label>
+            <input type="checkbox" id="visible" th:field="*{visible}" />
+          </div>
+
+          <div class="input-field">
+            <label class="label" for="randomColor">대체 색상 (이미지가 없을 때 사용)</label>
+            <input type="text" id="randomColor" th:field="*{randomColor}" placeholder="#abcdef" />
+          </div>
+
+          <div class="button-group">
+            <button type="submit" class="button2 button">저장</button>
+            <a th:href="@{/home}" class="button3 button4">취소</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>

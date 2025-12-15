@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>Register</title>
+  <link rel="stylesheet" th:href="@{/css/loginStyle.css}">
+  <link rel="stylesheet" th:href="@{/css/headerstyle.css}">
+  <link rel="stylesheet" th:href="@{/css/menustyle.css}">
+  <link rel="stylesheet" th:href="@{/css/AvaterStyle.css}">
+</head>
+<body>
+<div th:replace="fragments/admin-sidebar :: adminSidebar"></div>
+<div th:replace="fragments/header :: commonHeader"></div>
+
+<div class="hero-form">
+  <div class="text-content-title">
+    <div class="logintitle">Sign Up</div>
+    <div class="subtitle">계정을 만들어 로그인하세요.</div>
+  </div>
+
+  <form th:action="@{/register}" method="post" th:object="${registrationRequest}" class="form-contact" enctype="multipart/form-data">
+    <div class="input-field">
+      <label for="username" class="label">Username</label>
+      <input type="text" id="username" name="username" class="value input" th:field="*{username}" required />
+    </div>
+    <div class="input-field">
+      <label for="password" class="label">Password</label>
+      <input type="password" id="password" name="password" class="value input" th:field="*{password}" required />
+    </div>
+    <div class="input-field">
+      <label for="profilePictureUrl" class="label">Profile Image URL (선택)</label>
+      <input type="url" id="profilePictureUrl" name="profilePictureUrl" class="value input" th:field="*{profilePictureUrl}" placeholder="/images/default-profile.png" />
+    </div>
+    <div class="input-field">
+      <label for="profileFile" class="label">Profile Image Upload (선택)</label>
+      <input type="file" id="profileFile" name="profileFile" class="value input" accept="image/*" />
+    </div>
+    <div class="button-group">
+      <button class="loginbutton" type="submit">
+        <div class="loginbutton2">Create Account</div>
+      </button>
+    </div>
+  </form>
+
+  <div th:if="${errorMessage}" class="error" th:text="${errorMessage}"></div>
+  <div class="message">
+    이미 계정이 있나요? <a href="/login">로그인</a>
+  </div>
+</div>
+</body>
+</html>

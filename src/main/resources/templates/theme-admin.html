@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>피드백 테마 관리</title>
+  <link rel="stylesheet" th:href="@{/css/loginStyle.css}">
+  <link rel="stylesheet" th:href="@{/css/headerstyle.css}">
+  <link rel="stylesheet" th:href="@{/css/menustyle.css}">
+  <link rel="stylesheet" th:href="@{/css/AvaterStyle.css}">
+</head>
+<body>
+<div th:replace="fragments/admin-sidebar :: adminSidebar"></div>
+
+<div class="hero-form" style="margin-left:260px;">
+  <div th:replace="fragments/header :: commonHeader"></div>
+  <div class="text-content-title">
+    <div class="logintitle">피드백 테마 관리</div>
+    <div class="subtitle">추가/수정/삭제</div>
+  </div>
+
+  <form th:action="@{/admin/themes/add}" method="post" class="form-contact" style="margin-bottom: 16px;">
+    <div class="input-field">
+      <label class="label" for="name">테마 이름</label>
+      <input type="text" id="name" name="name" class="input" required />
+    </div>
+    <div class="button-group">
+      <button type="submit" class="button2 button">추가</button>
+    </div>
+  </form>
+
+  <div th:each="theme : ${themeList}" class="product-info-card goal-card" style="padding: 12px; margin-bottom: 12px;">
+    <div class="goal-body">
+      <div class="goal-title" th:text="${theme.name}">Theme</div>
+      <form th:action="@{/admin/themes/{id}/edit(id=${theme.id})}" method="post" style="display:flex; gap:8px; align-items:center;">
+        <input type="text" name="name" th:value="${theme.name}" class="input" style="flex:1;" />
+        <button type="submit" class="button2 button">수정</button>
+      </form>
+      <form th:action="@{/admin/themes/{id}/delete(id=${theme.id})}" method="post" style="margin-top:8px;">
+        <button type="submit" class="button3 button4">삭제</button>
+      </form>
+    </div>
+  </div>
+</div>
+</body>
+</html>
